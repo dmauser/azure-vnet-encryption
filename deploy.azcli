@@ -1,0 +1,124 @@
+#Paramters
+rg=lab-vnet-encryption
+location=westcentralus
+vmsize=Standard_D2d_v4
+
+# Prompt for username and password 
+# Set region unsername and password
+read -p "Enter your username (default: azureuser): " username
+username=${username:-azureuser} # Prompt for username, default to azureuser if not provided
+while true; do
+  read -s -p "Enter your password: " password
+  echo
+  read -s -p "Confirm your password: " password_confirm
+  echo
+  [ "$password" = "$password_confirm" ] && break
+  echo "Passwords do not match. Please try again."
+done
+
+# Deploy Hub and Spoke 
+az group create --name $rg --location $location
+az deployment group create --name Hub1-$location --resource-group $rg \
+--template-uri https://raw.githubusercontent.com/dmauser/azure-hub-spoke-base-lab/main/azuredeployv6.json \
+--parameters https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/parameters.json \
+--parameters virtualMachineSize=$vmsize virtualMachinePublicIP=false deployBastion=true \
+--parameters adminUsername=$username adminPassword=$password \
+--no-wait
+
+# Loop script to check deployment status
+while true; do
+    status=$(az deployment group show --name Hub1-$location --resource-group $rg --query properties.provisioningState -o tsv)
+    echo "Deployment status: $status"
+    if [ "$status" == "Succeeded" ]; then
+        echo "Deployment succeeded."
+        break
+    elif [ "$status" == "Failed" ]; then
+        echo "Deployment failed."
+    fi
+    sleep 30 # Wait for 30 seconds before checking again
+done
+
+# Create a VM2 in the spokevnet no public IP:
+az vm create --resource-group $rg --name az-spk1-lxvm2 --image Ubuntu2204 --public-ip-address "" --size $vmsize  --vnet-name az-spk1-vnet --subnet subnet1 --admin-username $username --admin-password $password --nsg "" --no-wait --only-show-errors
+
+# Only continue if all VMs in the resource group are running and in succeeded state
+az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
+    echo "Waiting for VM: $vm_name to be in 'VM running' state."
+    while true; do
+        vm_status=$(az vm get-instance-view --resource-group $rg --name $vm_name --query "instanceView.statuses[?code=='PowerState/running']" -o tsv)
+        if [ -n "$vm_status" ]; then
+            echo "VM: $vm_name is running."
+            break
+        else
+            echo "VM: $vm_name is not running yet. Checking again in 30 seconds."
+            sleep 30
+        fi
+    done
+done
+
+# Loop script to resize all vms that contains az- to Standard_D2d_v4
+az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
+    echo "Resizing VM: $vm_name"
+    az vm resize --resource-group $rg --name $vm_name --size Standard_D2d_v4 -o none
+done
+
+# Enable Accelerated Networking in all VM that starts with az-
+az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
+    echo "Enabling Accelerated Networking for VM: $vm_name"
+    az network nic update --resource-group $rg --name $(az vm show -g $rg -n $vm_name --query "networkProfile.networkInterfaces[0].id" -o tsv | awk -F/ '{print $NF}') --accelerated-networking true -o none
+done
+
+### Enabling vNET encryption and set enforcement policy to AllowUnencrypted
+# See: https://learn.microsoft.com/en-us/cli/azure/network/vnet?view=azure-cli-latest#az-network-vnet-update
+# Loop script to enable vNET encryption in all vnets stat start with az-
+az network vnet list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vnet_name; do
+    echo "Enabling vNET encryption for vNET: $vnet_name"
+    az network vnet update --resource-group $rg --name $vnet_name \
+    --enable-encryption true \
+    --encryption-enforcement-policy AllowUnencrypted \
+    -o none --no-wait
+done
+
+# Stop, deallocated and start all VMs in the resource group
+az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
+    echo "Stopping VM: $vm_name"
+    az vm deallocate --resource-group $rg --name $vm_name -o none
+done
+
+az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
+    echo "Starting VM: $vm_name"
+    az vm start --resource-group $rg --name $vm_name -o none
+done
+
+### Check at the OS Level if the Accelerated Networking is enabled
+# Example:
+#$ sudo lspci
+# Expected output:
+# fcbc:00:02.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5 Virtual Function] (rev 80)
+
+### Create a storage account for VNET flow logs
+export stgname=stgflowlogs$RANDOM
+az storage account create --name $stgname --resource-group $rg --location $location --sku Standard_LRS -o none
+
+### Enable VNET Flow logs:
+# Register Microsoft.Insights provider.
+az provider register --namespace Microsoft.Insights -o none
+
+# Create a VNet flow log.
+az network watcher flow-log create --location $location --resource-group $rg --name VNetFlowLog-$rg --vnet  --storage-account $stgname --enabled true --retention 7 --no-wait
+
+# Create a traffic analytics workspace.
+az monitor log-analytics workspace create --name vnetflowlogs-workspace --resource-group $rg --location $location -o none 
+
+# Create a VNet flow log.
+az network watcher flow-log create --location $location --name hub-vnetflowlogs-$rg --resource-group $rg --vnet az-hub-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
+az network watcher flow-log create --location $location --name spk1-vnetflowlogs-$rg --resource-group $rg --vnet az-spk1-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
+az network watcher flow-log create --location $location --name spk2-vnetflowlogs-$rg --resource-group $rg --vnet az-spk2-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
+
+# Query
+NTANetAnalytics
+| where SrcIp contains "10.0.1.4" and DestIp contains "10.0.0.4"
+//| where FlowEncryption == "Encrypted"
+//| where FlowEncryption != "Encrypted"
+| project TimeGenerated, SrcIp, DestIp, DestPort, FlowEncryption, FlowType
+
