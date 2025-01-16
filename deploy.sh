@@ -1,11 +1,11 @@
 #Paramters
 rg=lab-vnet-encryption
 location=westcentralus
-vmsize=Standard_D2d_v4
+vmsize=Standard_D2d_v4 # This is a VM size supported by VNET encryption
 
 # Prompt for username and password 
 # Set region unsername and password
-read -p "Enter your username (default: azureuser): " username
+read -p "Enter your username (hit enter for default: azureuser): " username
 username=${username:-azureuser} # Prompt for username, default to azureuser if not provided
 while true; do
   read -s -p "Enter your password: " password
@@ -54,12 +54,6 @@ az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm
             sleep 30
         fi
     done
-done
-
-# Loop script to resize all vms that contains az- to Standard_D2d_v4
-az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
-    echo "Resizing VM: $vm_name"
-    az vm resize --resource-group $rg --name $vm_name --size Standard_D2d_v4 -o none
 done
 
 # Enable Accelerated Networking in all VM that starts with az-
@@ -114,11 +108,4 @@ az monitor log-analytics workspace create --name vnetflowlogs-workspace --resour
 az network watcher flow-log create --location $location --name hub-vnetflowlogs-$rg --resource-group $rg --vnet az-hub-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
 az network watcher flow-log create --location $location --name spk1-vnetflowlogs-$rg --resource-group $rg --vnet az-spk1-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
 az network watcher flow-log create --location $location --name spk2-vnetflowlogs-$rg --resource-group $rg --vnet az-spk2-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
-
-# Query
-NTANetAnalytics
-| where SrcIp contains "10.0.1.4" and DestIp contains "10.0.0.4"
-//| where FlowEncryption == "Encrypted"
-//| where FlowEncryption != "Encrypted"
-| project TimeGenerated, SrcIp, DestIp, DestPort, FlowEncryption, FlowType
 
