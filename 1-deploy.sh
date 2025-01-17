@@ -16,7 +16,12 @@ while true; do
   echo "Passwords do not match. Please try again."
 done
 
+# Adding script starting time and finish time
+start=`date +%s`
+echo "Script started at $(date)"
+
 # Deploy Hub and Spoke 
+echo Deploying Hub and Spoke...
 az group create --name $rg --location $location
 az deployment group create --name Hub1-$location --resource-group $rg \
 --template-uri https://raw.githubusercontent.com/dmauser/azure-hub-spoke-base-lab/main/azuredeployv6.json \
@@ -39,9 +44,11 @@ while true; do
 done
 
 # Create a VM2 in the spokevnet no public IP:
+echo Creating vm az-spk1-lxvm2...
 az vm create --resource-group $rg --name az-spk1-lxvm2 --image Ubuntu2204 --public-ip-address "" --size $vmsize  --vnet-name az-spk1-vnet --subnet subnet1 --admin-username $username --admin-password $password --nsg "" --no-wait --only-show-errors
 
 # Only continue if all VMs in the resource group are running and in succeeded state
+echo Checking if all VMs are running...
 az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
     echo "Waiting for VM: $vm_name to be in 'VM running' state."
     while true; do
@@ -57,12 +64,14 @@ az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm
 done
 
 # Turning az-hub-lxvm into a router
+echo Turning az-hub-lxvm into a router...
 ### Enable IP Forwarded on the az-hub-lxvm nic
-az network nic update --resource-group $rg --name az-hub-lxvm-nic --ip-forwarding true -o none
+az network nic update --resource-group $rg --name az-hub-lxvm-nic --ip-forwarding true -o none --no-wait
 ### az run command on az-hub-lxvm using uri: https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouter.sh
 az vm run-command invoke -g $rg -n az-hub-lxvm --command-id RunShellScript --scripts "curl -s https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouter.sh | bash" -o none --no-wait
 
 # Create UDRs and associate to subnets
+echo Creating UDRs and associate them to the subnets...
 # Get private ip froom az-hub-lxvm network interface
 hub_private_ip=$(az network nic show --resource-group $rg --name az-hub-lxvm-nic --query "ipConfigurations[0].privateIPAddress" -o tsv)
 # Create a route table named spoke-to-hub
@@ -75,6 +84,7 @@ az network route-table route create --name 192prefix --resource-group $rg --rout
 az network vnet subnet update --resource-group $rg --vnet-name az-spk1-vnet --name subnet1 --route-table az-rt-spoke-to-hub -o none
 az network vnet subnet update --resource-group $rg --vnet-name az-spk2-vnet --name subnet1 --route-table az-rt-spoke-to-hub -o none
 
+echo "Creating UDR and associating it to the GatewaySubnet..."
 # Create GatewaySubnet route table
 az network route-table create --name az-rt-gwsubnet --resource-group $rg --location $location -o none
 # Add a route to the route table
@@ -85,21 +95,32 @@ az network vnet subnet update --resource-group $rg --vnet-name az-hub-vnet --nam
 
 
 ### Create a storage account for VNET flow logs
+echo Creating a storage account for VNET flow logs...
 export stgname=stgflowlogs$RANDOM
 az storage account create --name $stgname --resource-group $rg --location $location --sku Standard_LRS -o none
 
 ### Enable VNET Flow logs:
 # Register Microsoft.Insights provider.
+echo Registering Microsoft.Insights provider...
 az provider register --namespace Microsoft.Insights -o none
 
 # Create a VNet flow log.
+echo Creating a VNet flow log...
 az network watcher flow-log create --location $location --resource-group $rg --name VNetFlowLog-$rg --vnet  --storage-account $stgname --enabled true --retention 7 --no-wait
 
 # Create a traffic analytics workspace.
+echi Creating a traffic analytics workspace...
 az monitor log-analytics workspace create --name vnetflowlogs-workspace --resource-group $rg --location $location -o none 
 
 # Create a VNet flow log.
+echo Creating VNet flow logs for az-hub-vnet, az-spk1-vnet and az-spk2-vnet...
 az network watcher flow-log create --location $location --name hub-vnetflowlogs-$rg --resource-group $rg --vnet az-hub-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
 az network watcher flow-log create --location $location --name spk1-vnetflowlogs-$rg --resource-group $rg --vnet az-spk1-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
 az network watcher flow-log create --location $location --name spk2-vnetflowlogs-$rg --resource-group $rg --vnet az-spk2-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
 
+echo "Deployment hs been completed successfully."
+# Add script ending time but hours, minutes and seconds
+end=`date +%s`
+runtime=$((end-start))
+echo "Script finished at $(date)"
+echo "Total script execution time: $(($runtime / 3600)) hours $((($runtime / 60) % 60)) minutes and $(($runtime % 60)) seconds."

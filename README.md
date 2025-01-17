@@ -16,6 +16,14 @@ This lab build a Hub and Spoke and on-premises
 Step 1 - Run the base lab deployment script
 
 ```bash
-./1-deploy.sh
+curl -sL https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/1-deploy.sh | bash
 ```
+On this step it will prompt you for username and password.
 
+Step 2 - Before enable vNET encryption, let's validate the traffic between the VMs.
+
+Step 3 - Enable vNET encryption
+
+```bash
+curl -sL https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/2-enable-vnet-encryption.sh | bash
+```
