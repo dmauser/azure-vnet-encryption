@@ -12,3 +12,10 @@ Below are the links to the official documentation to help you understand the con
 ## Lab Scenario
 
 This lab build a Hub and Spoke and on-premises
+
+Step 1 - Run the base lab deployment script
+
+```bash
+./1-deploy.sh
+```
+
