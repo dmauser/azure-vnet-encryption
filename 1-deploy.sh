@@ -56,39 +56,33 @@ az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm
     done
 done
 
-# Enable Accelerated Networking in all VM that starts with az-
-az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
-    echo "Enabling Accelerated Networking for VM: $vm_name"
-    az network nic update --resource-group $rg --name $(az vm show -g $rg -n $vm_name --query "networkProfile.networkInterfaces[0].id" -o tsv | awk -F/ '{print $NF}') --accelerated-networking true -o none
-done
+# Turning az-hub-lxvm into a router
+### Enable IP Forwarded on the az-hub-lxvm nic
+az network nic update --resource-group $rg --name az-hub-lxvm-nic --ip-forwarding true -o none
+### az run command on az-hub-lxvm using uri: https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouter.sh
+az vm run-command invoke -g $rg -n az-hub-lxvm --command-id RunShellScript --scripts "curl -s https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouter.sh | bash" -o none --no-wait
 
-### Enabling vNET encryption and set enforcement policy to AllowUnencrypted
-# See: https://learn.microsoft.com/en-us/cli/azure/network/vnet?view=azure-cli-latest#az-network-vnet-update
-# Loop script to enable vNET encryption in all vnets stat start with az-
-az network vnet list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vnet_name; do
-    echo "Enabling vNET encryption for vNET: $vnet_name"
-    az network vnet update --resource-group $rg --name $vnet_name \
-    --enable-encryption true \
-    --encryption-enforcement-policy AllowUnencrypted \
-    -o none --no-wait
-done
+# Create UDRs and associate to subnets
+# Get private ip froom az-hub-lxvm network interface
+hub_private_ip=$(az network nic show --resource-group $rg --name az-hub-lxvm-nic --query "ipConfigurations[0].privateIPAddress" -o tsv)
+# Create a route table named spoke-to-hub
+az network route-table create --name az-rt-spoke-to-hub --resource-group $rg --location $location --disable-bgp-route-propagation true -o none
+# Add a route to the route table
+az network route-table route create --name 10prefix  --resource-group $rg --route-table-name az-rt-spoke-to-hub --address-prefix 10.0.0.0/8 --next-hop-type VirtualAppliance --next-hop-ip-address $hub_private_ip -o none
+az network route-table route create --name 172prefix --resource-group $rg --route-table-name az-rt-spoke-to-hub --address-prefix 172.16.0.0/12 --next-hop-type VirtualAppliance --next-hop-ip-address $hub_private_ip -o none
+az network route-table route create --name 192prefix --resource-group $rg --route-table-name az-rt-spoke-to-hub --address-prefix 192.168.0.0/16 --next-hop-type VirtualAppliance --next-hop-ip-address $hub_private_ip -o none
+# Associate route table to subnet1 on az-spk1-vnet and az-spk2-vnet
+az network vnet subnet update --resource-group $rg --vnet-name az-spk1-vnet --name subnet1 --route-table az-rt-spoke-to-hub -o none
+az network vnet subnet update --resource-group $rg --vnet-name az-spk2-vnet --name subnet1 --route-table az-rt-spoke-to-hub -o none
 
-# Stop, deallocated and start all VMs in the resource group
-az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
-    echo "Stopping VM: $vm_name"
-    az vm deallocate --resource-group $rg --name $vm_name -o none
-done
+# Create GatewaySubnet route table
+az network route-table create --name az-rt-gwsubnet --resource-group $rg --location $location -o none
+# Add a route to the route table
+az network route-table route create --name Spk1Net --resource-group $rg --route-table-name az-rt-gwsubnet --address-prefix 10.0.1.0/24 --next-hop-type VirtualAppliance --next-hop-ip-address $hub_private_ip -o none
+az network route-table route create --name Spk2Net --resource-group $rg --route-table-name az-rt-gwsubnet --address-prefix 10.0.2.0/24 --next-hop-type VirtualAppliance --next-hop-ip-address $hub_private_ip -o none
+# Associate to GatewaySubnet on az-hub-vnet
+az network vnet subnet update --resource-group $rg --vnet-name az-hub-vnet --name GatewaySubnet --route-table az-rt-gwsubnet -o none
 
-az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
-    echo "Starting VM: $vm_name"
-    az vm start --resource-group $rg --name $vm_name -o none
-done
-
-### Check at the OS Level if the Accelerated Networking is enabled
-# Example:
-#$ sudo lspci
-# Expected output:
-# fcbc:00:02.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5 Virtual Function] (rev 80)
 
 ### Create a storage account for VNET flow logs
 export stgname=stgflowlogs$RANDOM
