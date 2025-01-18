@@ -17,6 +17,10 @@ Below are the links to the official documentation to help you understand the con
 - Once vNET encryption is activated, it functions transparently and will not impact VMs that do not support it.
 At this time, the only way to validate whether vNET encryption is operational is to utilize vNET Flow Logs. Integrating these logs with Traffic Analytics is crucial for effectively visualizing the data.
 
+## Lab diagram
+
+![Lab Diagram](./diagram.png)
+
 ## Lab Scenario
 
 This lab builds a Hub and Spoke in Azure and emulates vNET for the On-premises. Both are connected using S2S IPSec VPN using VPN Virtual Network Gateways.
