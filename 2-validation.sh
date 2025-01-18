@@ -21,7 +21,7 @@ NTANetAnalytics
 //| where FlowEncryption != "Encrypted"
 | where DestPort == 22
 | project TimeGenerated, SrcIp, DestIp, DestPort, FlowEncryption, FlowType, FlowDirection, FlowStatus
-
+| sort by TimeGenerated desc 
 #Other Examples
 
 // IntraVNET
