@@ -24,5 +24,21 @@ done
 
 az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
     echo "Starting VM: $vm_name"
-    az vm start --resource-group $rg --name $vm_name -o none
+    az vm start --resource-group $rg --name $vm_name -o none --no-wait
+done
+
+# Only continue if all VMs in the resource group are running and in succeeded state
+echo Checking if all VMs are running...
+az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
+    echo "Waiting for VM: $vm_name to be in 'VM running' state."
+    while true; do
+        vm_status=$(az vm get-instance-view --resource-group $rg --name $vm_name --query "instanceView.statuses[?code=='PowerState/running']" -o tsv)
+        if [ -n "$vm_status" ]; then
+            echo "VM: $vm_name is running."
+            break
+        else
+            echo "VM: $vm_name is not running yet. Checking again in 30 seconds."
+            sleep 30
+        fi
+    done
 done
