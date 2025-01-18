@@ -127,13 +127,23 @@ az storage account create --name $stgname --resource-group $rg --location $locat
 echo Registering Microsoft.Insights provider...
 az provider register --namespace Microsoft.Insights -o none
 
-# Create a VNet flow log.
-echo Creating a VNet flow log...
-az network watcher flow-log create --location $location --resource-group $rg --name VNetFlowLog-$rg --vnet  --storage-account $stgname --enabled true --retention 7 --no-wait
-
 # Create a traffic analytics workspace.
 echi Creating a traffic analytics workspace...
 az monitor log-analytics workspace create --name vnetflowlogs-workspace --resource-group $rg --location $location -o none 
+
+# Check if the workspace is created
+while true; do
+    workspace_status=$(az monitor log-analytics workspace show --resource-group $rg --workspace-name vnetflowlogs-workspace --query "provisioningState" -o tsv)
+    echo "Workspace status: $workspace_status"
+    if [ "$workspace_status" == "Succeeded" ]; then
+        echo "Workspace created."
+        break
+    elif [ "$workspace_status" == "Failed" ]; then
+        echo "Workspace creation failed."
+        exit 1
+    fi
+    sleep 15 # Wait for 15 seconds before checking again
+done
 
 # Create a VNet flow log.
 echo Creating VNet flow logs for az-hub-vnet, az-spk1-vnet and az-spk2-vnet...
