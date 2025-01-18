@@ -46,6 +46,12 @@ az deployment group create --name Hub1-$location --resource-group $rg \
 --parameters VmAdminUsername=$username VmAdminPassword=$password \
 --no-wait
 
+# If the command above shows an error, stop script
+if [ $? -ne 0 ]; then
+    echo "Error deploying Hub and Spoke. Exiting script..."
+    exit 1
+fi
+
 # Loop script to check deployment status
 while true; do
     status=$(az deployment group show --name Hub1-$location --resource-group $rg --query properties.provisioningState -o tsv)

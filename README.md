@@ -60,8 +60,6 @@ This script ensures all VMs on the Azure side are enabled to use Accelerated Net
 
 ### Step 4 - Validation after enabling vNET encryption
 
-
-
 ### Accessing VMs using Bastion
 
 To access the VMs, you can use the Azure Bastion service. The script below will provide you with the necessary information to access the VMs.
