@@ -27,7 +27,7 @@ az deployment group create --name Hub1-$location --resource-group $rg \
 --template-uri https://raw.githubusercontent.com/dmauser/azure-hub-spoke-base-lab/main/azuredeployv6.json \
 --parameters https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/parameters.json \
 --parameters virtualMachineSize=$vmsize virtualMachinePublicIP=false deployBastion=true \
---parameters adminUsername=$username adminPassword=$password \
+--parameters VmAdminUsername=$username VmAdminPassword=$password \
 --no-wait
 
 # Loop script to check deployment status

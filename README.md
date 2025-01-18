@@ -28,7 +28,9 @@ Here are the steps to deploy the lab and make the appropriate configurations to 
 On this step, provide the username and password.
 
 ```bash
-curl -s https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/1-deploy.sh | bash
+wget -q https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/1-deploy.sh
+chmod +x 1-deploy.sh
+./1-deploy.sh
 ```
 
 ### Step 2 - Validation before enabling vNET encryption
