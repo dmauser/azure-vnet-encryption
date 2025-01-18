@@ -61,6 +61,7 @@ while true; do
         break
     elif [ "$status" == "Failed" ]; then
         echo "Deployment failed."
+        exit 1
     fi
     sleep 30 # Wait for 30 seconds before checking again
 done
