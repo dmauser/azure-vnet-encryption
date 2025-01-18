@@ -1,3 +1,4 @@
+rg=lab-vnet-encryption
 # Enable Accelerated Networking in all VM that starts with az-
 az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
     echo "Enabling Accelerated Networking for VM: $vm_name"
