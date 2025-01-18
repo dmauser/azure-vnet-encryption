@@ -116,7 +116,6 @@ az network route-table route create --name Spk2Net --resource-group $rg --route-
 # Associate to GatewaySubnet on az-hub-vnet
 az network vnet subnet update --resource-group $rg --vnet-name az-hub-vnet --name GatewaySubnet --route-table az-rt-gwsubnet -o none
 
-
 ### Create a storage account for VNET flow logs
 echo Creating a storage account for VNET flow logs...
 export stgname=stgflowlogs$RANDOM
