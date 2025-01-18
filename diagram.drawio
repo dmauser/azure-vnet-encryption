@@ -81,7 +81,7 @@
         <mxCell id="21" value="onprem-vpngw" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;glass=0;dashed=1;dashPattern=8 8;strokeColor=#E6E6E6;fontColor=#000000;fillColor=#CCCCCC;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Verdana;labelBackgroundColor=none;" parent="1" vertex="1">
           <mxGeometry x="224" y="234.83" width="28" height="37.16" as="geometry" />
         </mxCell>
-        <mxCell id="47" value="az-spk1-lxvm&lt;br&gt;10.0.1.4" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=img/lib/azure2/compute/Virtual_Machine.svg;labelBackgroundColor=none;fontFamily=Verdana;fillColor=default;" parent="1" vertex="1">
+        <mxCell id="47" value="az-spk1-lxvm2&lt;br&gt;10.0.1.5" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=img/lib/azure2/compute/Virtual_Machine.svg;labelBackgroundColor=none;fontFamily=Verdana;fillColor=default;" parent="1" vertex="1">
           <mxGeometry x="854.0013" y="83.3798865153538" width="34.086598798397866" height="31.616555407209614" as="geometry" />
         </mxCell>
         <mxCell id="48" value="" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=img/lib/azure2/networking/Route_Tables.svg;" parent="1" vertex="1">
