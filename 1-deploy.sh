@@ -1,7 +1,10 @@
 #Paramters
 rg=lab-vnet-encryption
-location=westcentralus
 vmsize=Standard_D2d_v4 # This is a VM size supported by VNET encryption
+
+# Prompt for location
+read -p "Enter the location (hit enter for default: westus3): " location
+location=${location:-westus3} # Prompt for location, default to westus3 if not provided
 
 # Prompt for username and password 
 # Set region unsername and password
@@ -20,9 +23,22 @@ done
 start=`date +%s`
 echo "Script started at $(date)"
 
+# Check lab-vnet-encryption resource group if exist prompt to delete
+echo Checking if $rg resource group exists...
+if [ $(az group exists --name $rg) = true ]; then
+    read -p "Resource group $rg already exists. Do you want to delete it? (y/n): " delete_rg
+    if [ "$delete_rg" == "y" ]; then
+        echo "Deleting resource group $rg..."
+        az group delete --name $rg --yes
+    else
+        echo "Exiting script..."
+        exit 1
+    fi
+fi
+
 # Deploy Hub and Spoke 
 echo Deploying Hub and Spoke...
-az group create --name $rg --location $location
+az group create --name $rg --location $location -o none
 az deployment group create --name Hub1-$location --resource-group $rg \
 --template-uri https://raw.githubusercontent.com/dmauser/azure-hub-spoke-base-lab/main/azuredeployv6.json \
 --parameters https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/parameters.json \
