@@ -11,7 +11,9 @@ Below are the links to the official documentation to help you understand the con
 
 ## Important takeaways
 
--Please review the official documentation to confirm which VM sizes support vNET encryption. For this lab, we will use the Standard_D2d_v4 size to maintain minimal costs.
+- At the time this lab was created, there are compatibility limitations interacting with other Azure product such as Azure DNS and Private Link Service, please review the [limitations](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-encryption-overview#limitations) section on the official documentation.
+- Please review the official documentation to confirm which VM sizes support vNET encryption.
+    - For this lab, we will use the Standard_D2d_v4 size to maintain minimal costs.
 - Using the vNET encryption feature incurs no charges, apart from the costs associated with supported VM sizes. Enabling Accelerated Networking comes at no additional cost.
 - Ensure that Accelerated Networking is enabled for all VMs.
 - Once vNET encryption is activated, it functions transparently and will not impact VMs that do not support it.
@@ -19,7 +21,7 @@ At this time, the only way to validate whether vNET encryption is operational is
 
 ## Lab diagram
 
-![Lab Diagram](./diagram.png)
+![Lab Diagram](./media/diagram.png)
 
 ## Lab Scenario
 
@@ -39,7 +41,7 @@ chmod +x 1-deploy.sh
 
 ### Step 2 - Validation before enabling vNET encryption
 
-Run the following commands to generate traffic.
+#### 2.1 - Run the following commands to generate traffic.
 
 ```bash
 # On az-spk1-lxvm run the following command to generate traffic to az-hub-lxvm:
@@ -51,6 +53,30 @@ while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 # On onprem-lmxvm run the following command to generate traffic to az-spk1-lxvm:
 while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 ```
+#### 2.2 - Review Traffic Analytics for encryption validation.
+
+```Kusto
+NTANetAnalytics
+| where TimeGenerated > ago(1h) 
+// Show all SSH traffic, use the filters below to narrow down
+//| where SrcIp contains "10.0.1.5" //ssh traffic from az-spk1-lxvm2
+//| where SrcIp contains "10.0.1.4" //ssh traffic from az-spk1-lxvm
+//| where SrcIp contains "10.0.2.4" //ssh traffic from az-spk2-lxvm
+//| where SrcIp contains "192.168.100.4" //ssh traffic from onprem-lxvm
+//| where FlowEncryption == "Encrypted"
+//| where FlowEncryption != "Encrypted"
+| where DestPort == 22
+| where FlowType !contains "Unknown" //Remove noise
+| project
+    TimeGenerated,SrcIp,DestIp,DestPort,FlowEncryption,FlowType,FlowDirection,FlowStatus
+| sort by TimeGenerated desc
+```
+
+Expected output:
+
+
+
+
 
 ### Step 3 - Enabling vNET encryption
 
