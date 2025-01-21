@@ -62,6 +62,12 @@ while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 
 #### 2.2 - Review Traffic Analytics for encryption validation.
 
+Access Log Analytics and select FlowFlog Type: VNet, click in "Launch Log Search Query". 
+
+![](./media/traffic-analytics.png)
+
+Run the following query:
+
 ```Kusto
 NTANetAnalytics
 | where TimeGenerated > ago(1h) 
@@ -81,7 +87,7 @@ NTANetAnalytics
 
 Expected output:
 
-![](./media/traffic-analytics.png)
+![](./media/log-kusto.png)
 
 ### Step 3 - Enabling vNET encryption
 
@@ -99,7 +105,21 @@ Here are the steps included in the script:
 
 ### Step 4 - Validation after enabling vNET encryption
 
-#### 4.1 - Run the following commands to generate traffic
+#### 4.1 - Validate Accellerated Networking is enabled
+
+On any of the Azure VMs, run the following command to validate Accelerated Networking is enabled:
+
+```bash
+sudo lspci
+# Expected output with Accelerated Networking enabled:
+fcbc:00:02.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5 Virtual Function] (rev 80)
+# Only Azure VMs has Accelerated Networking enabled, on-premises VMs does not have this feature.
+```
+On Azure Portal you can also make the same validate the Azure VM NIC, as shown:
+
+![](./media/nic-accelnet.png)
+
+#### 4.2 - Run the following commands to generate traffic
 
 Note: to access each VM use Serial Console or Bastion [instructions](#accessing-vms-using-bastion) below.
 
@@ -117,7 +137,7 @@ while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 ```
 
-#### 4.2 - Review Traffic Analytics for encryption validation.
+#### 4.2 - Review Traffic Analytics for encryption validation
 
 ```Kusto
 NTANetAnalytics
@@ -135,6 +155,9 @@ NTANetAnalytics
     TimeGenerated,SrcIp,DestIp,DestPort,FlowEncryption,FlowType,FlowDirection,FlowStatus
 | sort by TimeGenerated desc
 ```
+
+Expected output:
+![](./media/traffic-analytics-enc.png)
 
 ## Accessing VMs using Bastion
 
