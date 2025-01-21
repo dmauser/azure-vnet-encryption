@@ -22,7 +22,13 @@ Below are the links to the official documentation to help you understand the con
 
 ## Lab diagram
 
-![Lab Diagram](./media/diagram.png)
+![Lab Diagram](./media/diagram.gif)
+
+### Traffic Flows
+
+Below you can find the traffic flows for this lab:
+
+![Traffic Flows](./media/traffic-flows.png)
 
 ## Lab Scenario
 
@@ -62,7 +68,9 @@ while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 
 #### 2.2 - Review Traffic Analytics for encryption validation.
 
-Access Log Analytics and select FlowFlog Type: VNet, click in "Launch Log Search Query". 
+Access Log Analytics and select FlowFlog Type: VNet, click in "Launch Log Search Query".
+
+Note: it should take around 10-15 minutes to start showing data after deploying the lab.
 
 ![](./media/traffic-analytics.png)
 
