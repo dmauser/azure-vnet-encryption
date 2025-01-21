@@ -105,7 +105,7 @@ Here are the steps included in the script:
 
 ### Step 4 - Validation after enabling vNET encryption
 
-#### 4.1 - Validate Accellerated Networking is enabled
+#### 4.1 - Checking Accelerated Networking
 
 On any of the Azure VMs, run the following command to validate Accelerated Networking is enabled:
 
@@ -114,12 +114,21 @@ sudo lspci
 # Expected output with Accelerated Networking enabled:
 fcbc:00:02.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5 Virtual Function] (rev 80)
 # Only Azure VMs has Accelerated Networking enabled, on-premises VMs does not have this feature.
+# The expect output for VMs without Accelerated Networking is an empty output.
 ```
+
 On Azure Portal you can also make the same validate the Azure VM NIC, as shown:
 
 ![](./media/nic-accelnet.png)
 
-#### 4.2 - Run the following commands to generate traffic
+
+#### 4.2 - Checking vNET encryption via Azure Portal
+
+After you run the script on step 3 you can also review the Virtual Network properties and see if VNET encryption is enabled, as shown below:
+
+![](./media/vnet-encryption.png)
+
+#### 4.3 - Run the following commands to generate traffic
 
 Note: to access each VM use Serial Console or Bastion [instructions](#accessing-vms-using-bastion) below.
 
@@ -137,7 +146,7 @@ while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 ```
 
-#### 4.2 - Review Traffic Analytics for encryption validation
+#### 4.4 - Review Traffic Analytics for encryption validation
 
 ```Kusto
 NTANetAnalytics
