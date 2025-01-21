@@ -14,11 +14,11 @@ Below are the links to the official documentation to help you understand the con
 - At the time this lab was created, there are compatibility limitations interacting with other Azure product such as Azure DNS and Private Link Service, please review the [limitations](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-encryption-overview#limitations) section on the official documentation.
 - Please review the official documentation to confirm which VM sizes support vNET encryption.
     - For this lab, we will use the Standard_D2d_v4 size to maintain minimal costs.
-- Using the vNET encryption feature incurs no charges, apart from the costs associated with supported VM sizes. Also, enabling Accelerated Networking comes at no additional cost.
+- Using the vNET encryption feature incurs no charges, apart from the costs associated with supported VM sizes. 
 - Based on the official documentation: There are minimal performance overheads when using vNET encryption, but these are generally negligible. The feature is designed to be transparent and should not significantly impact the performance of your VMs.
     - The main reason is because the encryption processing is offloaded to an specilized hardaware called FPGA (Field-Programmable Gate Array). More information can be found in this paper [Azure Accelerated Networking: SmartNICs in the Public Cloud](https://www.microsoft.com/en-us/research/uploads/prod/2018/03/Azure_SmartNIC_NSDI_2018.pdf?msockid=14a99a3dc95567bc03778f53c8f4664c)
-- Ensure that Accelerated Networking is enabled for all VMs.
-- At this time, the only way to validate whether vNET encryption is operational is to utilize vNET Flow Logs. Integrating these logs with Traffic Analytics is crucial for effectively visualizing the data. That is demonstrated during the lab.
+- Ensure that Accelerated Networking is enabled for all VMs. Also, enabling Accelerated Networking comes at no additional cost.
+- At this time, the only way to validate whether vNET encryption is operational is to utilize vNET Flow Logs. Integrating these logs with Traffic Analytics is crucial for effectively visualizing the data. That is demonstrated in the lab below.
 
 ## Lab diagram
 
