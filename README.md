@@ -34,6 +34,8 @@ Below you can find the traffic flows for this lab:
 
 This lab builds a Hub and Spoke in Azure and emulates vNET for the On-premises. Both are connected using S2S IPSec VPN using VPN Virtual Network Gateways.
 
+You can close this GitHub Repositor and use VS code or run the commands below via [Cloud Shell](https://shell.azure.com) to deploy the lab.	
+
 Here are the steps to deploy the lab and make the appropriate configurations to enable vNET encryption and validations:
 
 ### Step 1 - Run the base lab deployment script
