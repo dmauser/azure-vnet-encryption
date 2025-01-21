@@ -14,7 +14,7 @@ Below are the links to the official documentation to help you understand the con
 - At the time this lab was created, there are compatibility limitations interacting with other Azure product such as Azure DNS and Private Link Service, please review the [limitations](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-encryption-overview#limitations) section on the official documentation.
 - Please review the official documentation to confirm which VM sizes support vNET encryption.
     - For this lab, we will use the Standard_D2d_v4 size to maintain minimal costs.
-- Using the vNET encryption feature incurs no charges, apart from the costs associated with supported VM sizes. Enabling Accelerated Networking comes at no additional cost.
+- Using the vNET encryption feature incurs no charges, apart from the costs associated with supported VM sizes. Also, enabling Accelerated Networking comes at no additional cost.
 - Based on the official documentation: There are minimal performance overheads when using vNET encryption, but these are generally negligible. The feature is designed to be transparent and should not significantly impact the performance of your VMs.
     - The main reason is because the encryption processing is offloaded to an specilized hardaware called FPGA (Field-Programmable Gate Array). More information can be found in this paper [Azure Accelerated Networking: SmartNICs in the Public Cloud](https://www.microsoft.com/en-us/research/uploads/prod/2018/03/Azure_SmartNIC_NSDI_2018.pdf?msockid=14a99a3dc95567bc03778f53c8f4664c)
 - Ensure that Accelerated Networking is enabled for all VMs.
@@ -34,7 +34,7 @@ Below you can find the traffic flows for this lab:
 
 This lab builds a Hub and Spoke in Azure and emulates vNET for the On-premises. Both are connected using S2S IPSec VPN using VPN Virtual Network Gateways.
 
-You can close this GitHub Repositor and use VS code or run the commands below via [Cloud Shell](https://shell.azure.com) to deploy the lab.	
+You can close this GitHub Repositor and use VS code or run the commands below via [Cloud Shell](https://shell.azure.com) to deploy the lab.
 
 Here are the steps to deploy the lab and make the appropriate configurations to enable vNET encryption and validations:
 
@@ -70,7 +70,7 @@ while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 
 #### 2.2 - Review Traffic Analytics for encryption validation.
 
-Access Log Analytics and select FlowFlog Type: VNet, click in "Launch Log Search Query".
+Access Network Watcher - Log Analytics and select FlowFlog Type: VNet, click in "Launch Log Search Query".
 
 Note: it should take around 10-15 minutes to start showing data after deploying the lab.
 
