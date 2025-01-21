@@ -87,7 +87,7 @@ NTANetAnalytics
 
 Expected output:
 
-![](./media/log-kusto.png)
+![](./media/logs-kusto.png)
 
 ### Step 3 - Enabling vNET encryption
 
