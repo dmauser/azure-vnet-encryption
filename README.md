@@ -99,13 +99,11 @@ Expected output:
 
 ### Step 3 - Enabling vNET encryption
 
-Note that you can review the steps executed by the script by clicking on the link below.
-
 ```bash
 curl -sL https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/3-enable-vnetencryption.sh | bash
 ```
 
-Here are the steps included in the script:
+Here are the steps included in the ![script](./3-enable-vnetencryption.sh) to enable vNET encryption:
 1) Enable Accelerated Networking for all VMs (except for the on-premises VM).
 2) Enable vNET encryption in all Azure vNET (az-hub-vnet, az-spk1-vnet, az-spk2-vnet).
 3) Stop, deallocate and start all VMs (except for the on-premises VM). This is required to active the vNET encryption feature the target VMs.
