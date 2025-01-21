@@ -1,11 +1,11 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.4 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="26.0.4">
   <diagram id="YnsuH4LNzArkPRJicwyz" name="Page-1">
-    <mxGraphModel dx="2656" dy="894" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="#FFFFFF" math="0" shadow="0">
+    <mxGraphModel dx="2401" dy="751" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="#FFFFFF" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="ZO6mygOJQg1MdGIY1tNN-86" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="-12" y="13" width="1103" height="657" as="geometry" />
+          <mxGeometry x="-12" y="7" width="1103" height="670" as="geometry" />
         </mxCell>
         <mxCell id="2" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;On-premises (Azure)&lt;br style=&quot;&quot;&gt;192.168.100.0/24&lt;br&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;labelBackgroundColor=none;fontFamily=Verdana;fontSize=15;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;dashed=1;strokeColor=#808080;fillColor=#E6E6E6;" parent="1" vertex="1">
           <mxGeometry x="62" y="194" width="236" height="159.5" as="geometry" />
