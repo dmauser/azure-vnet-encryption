@@ -11,13 +11,13 @@ Below are the links to the official documentation to help you understand the con
 
 ## Important takeaways
 
-- At the time this lab was created, there are compatibility limitations interacting with other Azure product such as Azure DNS and Private Link Service, please review the [limitations](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-encryption-overview#limitations) section on the official documentation.
+- At the time of this article's writing, there are compatibility limitations interacting with other Azure products such as Azure DNS and Private Link Service. Please review the [limitations](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-encryption-overview#limitations) section on the official documentation.
 - Please review the official documentation to confirm which VM sizes support vNET encryption.
-    - For this lab, we will use the Standard_D2d_v4 size to maintain minimal costs.
-- Using the vNET encryption feature incurs no charges, apart from the costs associated with supported VM sizes. 
-- Based on the official documentation: There are minimal performance overheads when using vNET encryption, but these are generally negligible. The feature is designed to be transparent and should not significantly impact the performance of your VMs.
-    - The main reason is because the encryption processing is offloaded to an specilized hardaware called FPGA (Field-Programmable Gate Array). More information can be found in this paper [Azure Accelerated Networking: SmartNICs in the Public Cloud](https://www.microsoft.com/en-us/research/uploads/prod/2018/03/Azure_SmartNIC_NSDI_2018.pdf?msockid=14a99a3dc95567bc03778f53c8f4664c)
-- Ensure that Accelerated Networking is enabled for all VMs. Also, enabling Accelerated Networking comes at no additional cost.
+    - We will use the Standard_D2d_v4 size for this lab to maintain minimal costs.
+- Using the vNET encryption feature incurs no charges, apart from the costs associated with supported VM sizes.
+- All VMs must have Accelerated Networking enabled. Also, enabling Accelerated Networking comes at no additional cost.
+- The official documentation shows minimal performance overheads when using vNET encryption, but these are generally negligible. The feature is designed to be transparent and should not significantly impact the performance of your VMs.
+    - The main reason is that the encryption processing is offloaded to a specialized hardware called FPGA (Field-Programmable Gate Array). You can find more information about FPGA in this paper, [Azure Accelerated Networking: SmartNICs in the Public Cloud](https://www.microsoft.com/en-us/research/uploads/prod/2018/03/Azure_SmartNIC_NSDI_2018.pdf?msockid=14a99a3dc95567bc03778f53c8f4664c)
 - At this time, the only way to validate whether vNET encryption is operational is to utilize vNET Flow Logs. Integrating these logs with Traffic Analytics is crucial for effectively visualizing the data. That is demonstrated in the lab below.
 
 ## Lab diagram
@@ -34,13 +34,13 @@ Below you can find the traffic flows for this lab:
 
 This lab builds a Hub and Spoke in Azure and emulates vNET for the On-premises. Both are connected using S2S IPSec VPN using VPN Virtual Network Gateways.
 
-You can close this GitHub Repositor and use VS code or run the commands below via [Cloud Shell](https://shell.azure.com) to deploy the lab.
+To deploy the lab, you can close this GitHub Repositor and use VS code or run the commands below via [Cloud Shell](https://shell.azure.com) to deploy the lab.
 
 Here are the steps to deploy the lab and make the appropriate configurations to enable vNET encryption and validations:
 
 ### Step 1 - Run the base lab deployment script
 
-On this step, provide the username and password.
+In this step, provide the username and password.
 
 ```bash
 wget -q -O 1-deploy.sh https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/1-deploy.sh
@@ -50,9 +50,9 @@ chmod +x 1-deploy.sh
 
 ### Step 2 - Validation before enabling vNET encryption
 
-#### 2.1 - Run the following commands to generate traffic
+#### 2.1 - Generating traffic before enabling vNET encryption
 
-Note: to access each VM use Serial Console or Bastion [instructions](#accessing-vms-using-bastion) below.
+Note: To access each VM, use Serial Console or Bastion [instructions](#accessing-vms-using-bastion) below.
 
 ```bash
 # On az-spk1-lxvm run the following command to generate traffic to az-hub-lxvm:
@@ -70,9 +70,9 @@ while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 
 #### 2.2 - Review Traffic Analytics for encryption validation.
 
-Access Network Watcher - Log Analytics and select FlowFlog Type: VNet, click in "Launch Log Search Query".
+Access Network Watcher - Log Analytics, select FlowFlog Type: VNet, and click "Launch Log Search Query".
 
-Note: it should take around 10-15 minutes to start showing data after deploying the lab.
+Note: it should take 15-20 minutes to show data after deploying the lab.
 
 ![](./media/traffic-analytics.png)
 
@@ -108,37 +108,37 @@ curl -sL https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/he
 Here are the steps included in the [script](./3-enable-vnetencryption.sh) to enable vNET encryption:
 1) Enable Accelerated Networking for all VMs (except for the on-premises VM).
 2) Enable vNET encryption in all Azure vNET (az-hub-vnet, az-spk1-vnet, az-spk2-vnet).
-3) Stop, deallocate and start all VMs (except for the on-premises VM). This is required to active the vNET encryption feature the target VMs.
+3) Stop, deallocate, and start all VMs (except for the on-premises VM). That is required to activate the vNET encryption feature of the target VMs.
 
 
 ### Step 4 - Validation after enabling vNET encryption
 
 #### 4.1 - Checking Accelerated Networking
 
-On any of the Azure VMs, run the following command to validate Accelerated Networking is enabled:
+On any of the Azure VMs, run the following command to validate that Accelerated Networking is enabled:
 
 ```bash
 sudo lspci
 # Expected output with Accelerated Networking enabled:
 fcbc:00:02.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5 Virtual Function] (rev 80)
-# Only Azure VMs has Accelerated Networking enabled, on-premises VMs does not have this feature.
-# The expect output for VMs without Accelerated Networking is an empty output.
+# Only Azure VMs have Accelerated Networking enabled, on-premises VMs does not have this feature.
+# The expected output for VMs without Accelerated Networking is an empty output.
 ```
 
-On Azure Portal you can also make the same validate the Azure VM NIC, as shown:
+On the Azure Portal, you can also make the same validate the Azure VM NIC, as shown:
 
 ![](./media/nic-accelnet.png)
 
 
 #### 4.2 - Checking vNET encryption via Azure Portal
 
-After you run the script on step 3 you can also review the Virtual Network properties and see if VNET encryption is enabled, as shown below:
+After you run the script on step 3, you can also review the Virtual Network properties and see if VNET encryption is enabled, as shown below:
 
 ![](./media/vnet-encryption.png)
 
-#### 4.3 - Run the following commands to generate traffic
+#### 4.3 - Generating traffic after enabling vNET encryption
 
-Note: to access each VM use Serial Console or Bastion [instructions](#accessing-vms-using-bastion) below.
+Note: To access each VM, use Serial Console or Bastion [instructions](#accessing-vms-using-bastion) below.
 
 ```bash
 # On az-spk1-lxvm run the following command to generate traffic to az-hub-lxvm:
@@ -154,7 +154,7 @@ while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 while true; do echo -n "$(date) "; netcat -v -z 10.0.1.4 22; sleep 15; done
 ```
 
-#### 4.4 - Review Traffic Analytics for encryption validation
+#### 4.4 - Reviewing Traffic Analytics for encryption validation
 
 ```Kusto
 NTANetAnalytics

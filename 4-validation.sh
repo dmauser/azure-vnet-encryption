@@ -1,9 +1,9 @@
 ### Check at the OS Level if the Accelerated Networking is enabled. That can be done in any VM on the hub and spoke networks
-# Example:
 sudo lspci
 # Expected output with Accelerated Networking enabled:
-# fcbc:00:02.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5 Virtual Function] (rev 80)
-# Only Azure VMs has Accelerated Networking enabled, on-premises VMs does not have this feature.
+fcbc:00:02.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5 Virtual Function] (rev 80)
+# Only Azure VMs have Accelerated Networking enabled, on-premises VMs does not have this feature.
+# The expected output for VMs without Accelerated Networking is an empty output.
 
 # On az-spk1-lxvm run the following command to generate traffic to az-hub-lxvm:
 while true; do echo -n "$(date) "; netcat -v -z 10.0.0.4 22; sleep 15; done
