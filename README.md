@@ -231,7 +231,7 @@ To remove all resources created by this lab, run the following command:
 ```bash
 # Note: change the rg variable to the resource group name you used in the deployment
 rg=lab-vnet-encryption
-az group delete -n $rg -y
+az group delete -n $rg -y --no-wait
 ```
 
 ### Conclusion
