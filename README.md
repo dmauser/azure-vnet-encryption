@@ -17,8 +17,22 @@ Below are the links to the official documentation to help you understand the con
 - Using the vNET encryption feature incurs no charges, apart from the costs associated with supported VM sizes.
 - All VMs must have Accelerated Networking enabled. Also, enabling Accelerated Networking comes at no additional cost.
 - The official documentation shows minimal performance overheads when using vNET encryption, but these are generally negligible. The feature is designed to be transparent and should not significantly impact the performance of your VMs.
-    - The main reason is that the encryption processing is offloaded to a specialized hardware called FPGA (Field-Programmable Gate Array). You can find more information about FPGA in this paper, [Azure Accelerated Networking: SmartNICs in the Public Cloud](https://www.microsoft.com/en-us/research/uploads/prod/2018/03/Azure_SmartNIC_NSDI_2018.pdf?msockid=14a99a3dc95567bc03778f53c8f4664c)
+    - The main reason is that the encryption processing is offloaded to a specialized hardware called FPGA (Field-Programmable Gate Array). 
+    - More information about FPGA:[Azure Accelerated Networking: SmartNICs in the Public Cloud](https://www.microsoft.com/en-us/research/uploads/prod/2018/03/Azure_SmartNIC_NSDI_2018.pdf?msockid=14a99a3dc95567bc03778f53c8f4664c) and [Inside the Microsoft FPGA-based configurable cloud](https://www.microsoft.com/en-us/research/video/inside-microsoft-fpga-based-configurable-cloud/?msockid=14a99a3dc95567bc03778f53c8f4664c)
 - At this time, the only way to validate whether vNET encryption is operational is to utilize vNET Flow Logs. Integrating these logs with Traffic Analytics is crucial for effectively visualizing the data. That is demonstrated in the lab below.
+
+
+## How vNET encryption works
+
+Based on the links shared on the previous section, here is a summary of how vNET encryption works:
+
+### Intra-vNET
+
+![](./media/how-encryption-works-intra.png)
+
+### Inter-vNET
+
+![](./media/how-encryption-works-inter.png)
 
 ## Lab diagram
 
