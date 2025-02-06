@@ -128,11 +128,12 @@ az provider register --namespace Microsoft.Insights -o none
 
 # Create a traffic analytics workspace.
 echo Creating a traffic analytics workspace...
-az monitor log-analytics workspace create --name vnetflowlogs-workspace --resource-group $rg --location $location -o none 
+export workspace=vnetflowlogs-workspace$RANDOM
+az monitor log-analytics workspace create --name $workspace --resource-group $rg --location $location -o none 
 
 # Check if the workspace is created
 while true; do
-    workspace_status=$(az monitor log-analytics workspace show --resource-group $rg --workspace-name vnetflowlogs-workspace --query "provisioningState" -o tsv)
+    workspace_status=$(az monitor log-analytics workspace show --resource-group $rg --workspace-name $workspace --query "provisioningState" -o tsv)
     echo "Workspace status: $workspace_status"
     if [ "$workspace_status" == "Succeeded" ]; then
         echo "Workspace created."
@@ -146,9 +147,9 @@ done
 
 # Create a VNet flow log.
 echo Creating VNet flow logs for az-hub-vnet, az-spk1-vnet and az-spk2-vnet...
-az network watcher flow-log create --location $location --name hub-vnetflowlogs-$rg --resource-group $rg --vnet az-hub-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
-az network watcher flow-log create --location $location --name spk1-vnetflowlogs-$rg --resource-group $rg --vnet az-spk1-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
-az network watcher flow-log create --location $location --name spk2-vnetflowlogs-$rg --resource-group $rg --vnet az-spk2-vnet --storage-account $stgname --workspace vnetflowlogs-workspace --interval 10 --traffic-analytics true -o none
+az network watcher flow-log create --location $location --name hub-vnetflowlogs-$rg --resource-group $rg --vnet az-hub-vnet --storage-account $stgname --workspace $workspace --interval 10 --traffic-analytics true -o none
+az network watcher flow-log create --location $location --name spk1-vnetflowlogs-$rg --resource-group $rg --vnet az-spk1-vnet --storage-account $stgname --workspace $workspace --interval 10 --traffic-analytics true -o none
+az network watcher flow-log create --location $location --name spk2-vnetflowlogs-$rg --resource-group $rg --vnet az-spk2-vnet --storage-account $stgname --workspace $workspace --interval 10 --traffic-analytics true -o none
 
 echo "Deployment hs been completed successfully."
 # Add script ending time but hours, minutes and seconds
