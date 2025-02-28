@@ -7,7 +7,6 @@ read -p "Enter the location (hit enter for default: westus3): " location
 location=${location:-westus3} # Prompt for location, default to westus3 if not provided
 
 # Prompt for username and password 
-# Set region unsername and password
 read -p "Enter your username (hit enter for default: azureuser): " username
 username=${username:-azureuser} # Prompt for username, default to azureuser if not provided
 while true; do
