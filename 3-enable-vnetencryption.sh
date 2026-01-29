@@ -16,7 +16,7 @@ az network vnet list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | whi
     -o none --no-wait
 done
 
-# Stop, deallocated and start all VMs in the resource group
+# Stop, deallocate and start all VMs in the resource group
 az vm list -g $rg --query "[?contains(name, 'az-')].name" -o tsv | while read vm_name; do
     echo "Stopping VM: $vm_name"
     az vm deallocate --resource-group $rg --name $vm_name -o none
