@@ -90,7 +90,7 @@ echo Turning az-hub-lxvm into a router...
 ### Enable IP Forwarded on the az-hub-lxvm nic
 az network nic update --resource-group $rg --name az-hub-lxvm-nic --ip-forwarding true -o none --no-wait
 ### az run command on az-hub-lxvm using uri: https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouterv2.sh
-az vm run-command invoke -g $rg -n az-hub-lxvm --command-id RunShellScript --scripts "curl -s https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouter.sh | bash" -o none --no-wait
+az vm run-command invoke -g $rg -n az-hub-lxvm --command-id RunShellScript --scripts "curl -s https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouterv2.sh | bash" -o none --no-wait
 
 # Create UDRs and associate to subnets
 echo Creating UDRs and associate them to the subnets...
