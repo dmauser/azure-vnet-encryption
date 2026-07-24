@@ -89,6 +89,11 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('PublicIPName1')]",
             "location": "[variables('location')]",
+            "zones": [
+                "1",
+                "2",
+                "3"
+            ],
             "properties": {
                 "publicIPAllocationMethod": "Static"
             },
@@ -103,6 +108,11 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('PublicIPName2')]",
             "location": "[variables('location')]",
+            "zones": [
+                "1",
+                "2",
+                "3"
+            ],
             "properties": {
                 "publicIPAllocationMethod": "Static"
             },
