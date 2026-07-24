@@ -39,7 +39,7 @@ fi
 echo Deploying Hub and Spoke...
 az group create --name $rg --location $location -o none
 az deployment group create --name Hub1-$location --resource-group $rg \
---template-uri https://raw.githubusercontent.com/dmauser/azure-hub-spoke-base-lab/main/azuredeployv6.json \
+--template-uri https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/main/linked/azuredeployv6.json \
 --parameters https://raw.githubusercontent.com/dmauser/azure-vnet-encryption/refs/heads/main/parameters.json \
 --parameters virtualMachineSize=$vmsize virtualMachinePublicIP=false deployBastion=true \
 --parameters VmAdminUsername=$username VmAdminPassword=$password \
@@ -90,7 +90,7 @@ echo Turning az-hub-lxvm into a router...
 ### Enable IP Forwarded on the az-hub-lxvm nic
 az network nic update --resource-group $rg --name az-hub-lxvm-nic --ip-forwarding true -o none --no-wait
 ### az run command on az-hub-lxvm using uri: https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouterv2.sh
-az vm run-command invoke -g $rg -n az-hub-lxvm --command-id RunShellScript --scripts "curl -s https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouterv2.sh | bash" -o none --no-wait
+az vm run-command invoke -g $rg -n az-hub-lxvm --command-id RunShellScript --scripts "curl -s https://raw.githubusercontent.com/dmauser/AzureVM-Router/refs/heads/master/linuxrouterv2.sh | bash" -o none
 
 # Create UDRs and associate to subnets
 echo Creating UDRs and associate them to the subnets...
@@ -150,7 +150,7 @@ az network watcher flow-log create --location $location --name hub-vnetflowlogs-
 az network watcher flow-log create --location $location --name spk1-vnetflowlogs-$rg --resource-group $rg --vnet az-spk1-vnet --storage-account $stgname --workspace $workspace --interval 10 --traffic-analytics true -o none
 az network watcher flow-log create --location $location --name spk2-vnetflowlogs-$rg --resource-group $rg --vnet az-spk2-vnet --storage-account $stgname --workspace $workspace --interval 10 --traffic-analytics true -o none
 
-echo "Deployment hs been completed successfully."
+echo "Deployment has been completed successfully."
 # Add script ending time but hours, minutes and seconds
 end=`date +%s`
 runtime=$((end-start))

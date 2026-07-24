@@ -47,7 +47,7 @@ Below you can find the traffic flows for this lab:
 
 This lab builds a Hub and Spoke in Azure and emulates vNET for the On-premises. Both are connected using S2S IPSec VPN using VPN Virtual Network Gateways.
 
-To deploy the lab, you can close this GitHub Repositor and use VS code or run the commands below via [Cloud Shell](https://shell.azure.com) to deploy the lab.
+To deploy the lab, you can clone this GitHub Repository and use VS Code or run the commands below via [Cloud Shell](https://shell.azure.com) to deploy the lab.
 
 Here are the steps to deploy the lab and make the appropriate configurations to enable vNET encryption and validations:
 
@@ -60,6 +60,8 @@ wget -q -O 1-deploy.sh https://raw.githubusercontent.com/dmauser/azure-vnet-encr
 chmod +x 1-deploy.sh
 ./1-deploy.sh
 ```
+
+> **Note on VPN Gateway SKU:** Azure has retired the non-Availability-Zone VPN Gateway SKUs (`VpnGw1`–`VpnGw5`) for new gateways, so the lab uses the Availability-Zone SKUs (`VpnGw1AZ`–`VpnGw5AZ`) — set via `gatewaySku` in `parameters.json`. The lab deploys a patched copy of the base ARM template from this repo's [`linked/`](./linked/) folder (`azuredeployv6.json`, `new-vpngw.json`, `vnet-peering.json`) which also fixes a spoke-to-hub peering bug (`useRemoteGateways` is now derived from `deployHubVPNGateway`, preventing `RemoteVnetHasNoGateways` failures when the hub gateway is not deployed).
 
 ### Step 2 - Validation before enabling vNET encryption
 
